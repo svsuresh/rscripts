@@ -1,11 +1,12 @@
 ---
-title: "wasabi_sleutth_workflow"
+title: "WASABI Sleuth Workflow"
 author: "suresh"
 date: "20 May 2018"
 output: html_document
 ---
+### Load libraries
+
 ```{R}
-# Load libraries
 suppressMessages(library(tximport))
 suppressMessages(library(readr))
 suppressMessages(library(stringr))
@@ -15,29 +16,30 @@ suppressMessages(library(wasabi))
 suppressMessages(library(sleuth))
 suppressMessages(library(pheatmap))
 ```
-
-## Wasabi and Sleuth workflow
+### Create directory to store results
 ```{R}
 dir.create("results/sleuth_results")
 ```
+### Prepare the sample names and condition
 ```{R}
 # Load sample information
 samples=data.frame(samples=col_concat(str_split_fixed(list.files("./results/salmon"),"_",5)[,2:3],"_"), condition=str_split_fixed(list.files("./results/salmon"),"_",5)[,2])
 samples
 ```
 
+### store the sammple (parent) directory information
 ```{R}
-# # Wasabi workflow
 sfdirs <- file.path("results/salmon", c(list.files("results/salmon")))
 sfdirs
 ```
 
+### Create files necessary for Sleuth analysis. Function is provided by Wasabi.
 ```{R}
 prepare_fish_for_sleuth(sfdirs)
 ```
 
+### Preparation for sleuth
 ```{R}
-## Preparation for sleuth
 sfdata=data.frame(sample=list.files("results/salmon"), path=sfdirs, condition=samples$condition, stringsAsFactors = F)
 ```
 
@@ -50,49 +52,44 @@ tx2gene=read.csv("reference/t2gene.dedup.tsv", sep = "\t",stringsAsFactors = F, 
 names(tx2gene)=c("target_id","HGNC")
 ```
 
+### Sleuth object
 ```{R}
 so <- sleuth_prep(sfdata, design, target_mapping = tx2gene,num_cores = 1)
 ```
-
+### Sleuth fit
 ```{R}
-# # Sleuth fit
 so <- sleuth_fit(so)
 ```
-
+### Extract  expression data
 ```{R}
-# # Extract  expression data
  oe <- sleuth_wt(so, 'conditiontumor')
 ```
-
+### Sleuth results as data frame
 ```{R}
-# # Sleuth results as data frame
  sleuth_results_oe=sleuth_results(oe, 'conditiontumor', show_all = TRUE)
 ```
-
+### Remove rows with no data # Remove rows with no data
 ```{R}
-# # Remove rows with no data
 sloe=sleuth_results_oe[complete.cases(sleuth_results_oe),]
 ```
-
+### Write the results to hard disk
 ```{R}
 write.csv(sloe, "results/sleuth_results/sleuth_expression_results.txt", sep="\t")
 ```
-
+### Merge gene names from tx2gene object and order by qvalue
 ```{R}
-# # Merge gene names from tx2gene object and order by qvalue
 mer_sloe=merge(sloe, tx2gene, all.x=T)
 ```
 
 ```{R}
-mer_sloe[order(mer_sloe$qval),]
+head(mer_sloe[order(mer_sloe$qval),])
 ```
 
+### Write the results to hard disk
 ```{R}
-# # Write the results to hard disk
  write.csv(sloe, "results/sleuth_results/sleuth_expression_results_merged.txt", sep="\t")
 ```
-
+### Save the workflow to HDD
 ```{R}
-# # Save the workflow to HDD
  save.image("results/sleuth_results/sleuth_results.Rdata")
 ```
