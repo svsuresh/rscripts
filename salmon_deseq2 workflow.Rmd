@@ -28,9 +28,8 @@ dir.create('results/salmon_deseq2_results', showWarnings = FALSE, recursive = TR
 ```{R}
 list.files("./results/salmon")
 ```
-
+### Load sample information
 ```{R}
-# Load sample information
 samples=data.frame(samples=col_concat(str_split_fixed(list.files("./results/salmon"),"_",5)[,2:3],"_"), condition=str_split_fixed(list.files("./results/salmon"),"_",5)[,2])
 samples
 ```
@@ -50,53 +49,45 @@ tx2gene=read.csv("reference/t2gene.dedup.tsv", sep = "\t",stringsAsFactors = F, 
 ```{R}
 salmon_data <- tximport(files, type="salmon", tx2gene=tx2gene)
 ```
-
+### Create a DESEQ object
 ```{R}
 ddsTxi <- DESeqDataSetFromTximport(salmon_data,
                                    colData = samples ,
                                    design = ~ condition)
 ```
-
+### Filter transcripts with less than 10 counts
 ```{R}
-## Filter transcripts with less than 10 counts
 keep <- rowSums(counts(ddsTxi)) >= 10
 dds <- ddsTxi[keep,]
 dds
 ```
-
+### To be sure, make normal as reference condition
 ```{R}
-# To be sure, make normal as reference condition
 dds$condition <- relevel(dds$condition, ref = "normal")
 dds
 ```
-
+### Run DESeq on DESeq2 object
 ```{R}
-# DESeq on DESeq2 object
 ddds <- DESeq(dds)
 ```
-
+### Extract results for comparison
 ```{R}
-# Extract results for comparison
 res <- results(ddds, coef="condition_tumor_vs_normal")
 ```
-
+### sort the results by adjusted p-values
 ```{R}
-# sort the results
 resOrdered <- res[order(res$padj),]
 ```
-
+### Write results to Hard disk
 ```{R}
-## Write results to Hard disk
 write.csv(as.data.frame(resOrdered),file="results/salmon_deseq2_results/condition_treated_results.csv")
 ```
-
+### Shrink the log values
 ```{R}
-# Shrink the log values
 reslfc=lfcShrink(ddds, coef="condition_tumor_vs_normal", type="apeglm")
 ```
-
+### store the plots in pdf
 ```{R}
-# store the pics in pdf
 pdf(file = "results/salmon_deseq2_results/salmon_deseq2_results.pdf")
 # Plot counts for gene with lowest fold change (down regulated gene)
 plotCounts(ddds, gene=which.min(res$log2FoldChange), intgroup="condition")
