@@ -1,0 +1,98 @@
+---
+title: "wasabi_sleutth_workflow"
+author: "suresh"
+date: "20 May 2018"
+output: html_document
+---
+```{R}
+# Load libraries
+suppressMessages(library(tximport))
+suppressMessages(library(readr))
+suppressMessages(library(stringr))
+suppressMessages(library(assertr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(wasabi))
+suppressMessages(library(sleuth))
+suppressMessages(library(pheatmap))
+```
+
+## Wasabi and Sleuth workflow
+```{R}
+dir.create("results/sleuth_results")
+```
+```{R}
+# Load sample information
+samples=data.frame(samples=col_concat(str_split_fixed(list.files("./results/salmon"),"_",5)[,2:3],"_"), condition=str_split_fixed(list.files("./results/salmon"),"_",5)[,2])
+samples
+```
+
+```{R}
+# # Wasabi workflow
+sfdirs <- file.path("results/salmon", c(list.files("results/salmon")))
+sfdirs
+```
+
+```{R}
+prepare_fish_for_sleuth(sfdirs)
+```
+
+```{R}
+## Preparation for sleuth
+sfdata=data.frame(sample=list.files("results/salmon"), path=sfdirs, condition=samples$condition, stringsAsFactors = F)
+```
+
+```{R}
+design = ~condition
+```
+
+```{R}
+tx2gene=read.csv("reference/t2gene.dedup.tsv", sep = "\t",stringsAsFactors = F, header=F)
+names(tx2gene)=c("target_id","HGNC")
+```
+
+```{R}
+so <- sleuth_prep(sfdata, design, target_mapping = tx2gene,num_cores = 1)
+```
+
+```{R}
+# # Sleuth fit
+so <- sleuth_fit(so)
+```
+
+```{R}
+# # Extract  expression data
+ oe <- sleuth_wt(so, 'conditiontumor')
+```
+
+```{R}
+# # Sleuth results as data frame
+ sleuth_results_oe=sleuth_results(oe, 'conditiontumor', show_all = TRUE)
+```
+
+```{R}
+# # Remove rows with no data
+sloe=sleuth_results_oe[complete.cases(sleuth_results_oe),]
+```
+
+```{R}
+write.csv(sloe, "results/sleuth_results/sleuth_expression_results.txt", sep="\t")
+```
+
+```{R}
+# # Merge gene names from tx2gene object and order by qvalue
+mer_sloe=merge(sloe, tx2gene, all.x=T)
+```
+
+```{R}
+mer_sloe[order(mer_sloe$qval),]
+```
+
+```{R}
+# # Write the results to hard disk
+ write.csv(sloe, "results/sleuth_results/sleuth_expression_results_merged.txt", sep="\t")
+```
+
+```{R}
+# # Save the workflow to HDD
+ save.image("results/sleuth_results/sleuth_results.Rdata")
+```
