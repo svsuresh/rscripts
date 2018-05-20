@@ -1,0 +1,174 @@
+---
+title: "Salmon-DESEQ2 workflow"
+output:
+  html_document:
+    df_print: paged
+---
+### Load libraries
+```{R}
+# Load libraries
+suppressMessages(library(vsn))
+suppressMessages(library(tximport))
+suppressMessages(library(readr))
+suppressMessages(library(stringr))
+suppressMessages(library(assertr))
+suppressMessages(library(DESeq2))
+suppressMessages(library(ggplot2))
+suppressMessages(library(apeglm))
+suppressMessages(library(pheatmap))
+suppressMessages(library(tinytex))
+suppressMessages(library(regionReport))
+```
+### DESEQ2 workflow
+```{R}
+# Create a directory to store DESeq2 results
+dir.create('results/salmon_deseq2_results', showWarnings = FALSE, recursive = TRUE)
+```
+
+```{R}
+list.files("./results/salmon")
+```
+
+```{R}
+# Load sample information
+samples=data.frame(samples=col_concat(str_split_fixed(list.files("./results/salmon"),"_",5)[,2:3],"_"), condition=str_split_fixed(list.files("./results/salmon"),"_",5)[,2])
+samples
+```
+
+```{R}
+row.names(samples)=samples[,1]
+```
+
+```{R}
+files=file.path("results/salmon",list.files("results/salmon"),"quant.sf")
+```
+
+```{R}
+tx2gene=read.csv("reference/t2gene.dedup.tsv", sep = "\t",stringsAsFactors = F, header=F)
+```
+
+```{R}
+salmon_data <- tximport(files, type="salmon", tx2gene=tx2gene)
+```
+
+```{R}
+ddsTxi <- DESeqDataSetFromTximport(salmon_data,
+                                   colData = samples ,
+                                   design = ~ condition)
+```
+
+```{R}
+## Filter transcripts with less than 10 counts
+keep <- rowSums(counts(ddsTxi)) >= 10
+dds <- ddsTxi[keep,]
+dds
+```
+
+```{R}
+# To be sure, make normal as reference condition
+dds$condition <- relevel(dds$condition, ref = "normal")
+dds
+```
+
+```{R}
+# DESeq on DESeq2 object
+ddds <- DESeq(dds)
+```
+
+```{R}
+# Extract results for comparison
+res <- results(ddds, coef="condition_tumor_vs_normal")
+```
+
+```{R}
+# sort the results
+resOrdered <- res[order(res$padj),]
+```
+
+```{R}
+## Write results to Hard disk
+write.csv(as.data.frame(resOrdered),file="results/salmon_deseq2_results/condition_treated_results.csv")
+```
+
+```{R}
+# Shrink the log values
+reslfc=lfcShrink(ddds, coef="condition_tumor_vs_normal", type="apeglm")
+```
+
+```{R}
+# store the pics in pdf
+pdf(file = "results/salmon_deseq2_results/salmon_deseq2_results.pdf")
+# Plot counts for gene with lowest fold change (down regulated gene)
+plotCounts(ddds, gene=which.min(res$log2FoldChange), intgroup="condition")
+# Plot counts for gene with lowest adjusted p-value (statistically significant gene)
+plotCounts(ddds, gene=which.min(res$padj), intgroup="condition")
+# PCA for samples
+plotPCA(rlog(ddds), intgroup="condition")+theme_bw()
+# Distance plot for samples
+sampleDists <- as.matrix(dist(t(assay(rlog(ddds)))))
+cols=colorRampPalette( c("green","yellow","red"))(255)
+pheatmap(sampleDists, col=cols)
+##  Expression heatmap
+select=row.names(res[order(-res$log2FoldChange),])[1:20]
+cols=colorRampPalette( c("green","yellow","red"))(255)
+pheatmap(assay(rlog(ddds))[select,], col=cols)
+#Plot data post transformation (rlog)
+meanSdPlot(assay(rlog(ddds)))
+# Plot MA plots
+plotMA(res)
+dev.off()
+```
+### Plot counts for gene with lowest fold change (down regulated gene)
+```{R}
+plotCounts(ddds, gene=which.min(res$log2FoldChange), intgroup="condition")
+```
+### Plot counts for gene with lowest adjusted p-value (statistically significant gene)
+```{R}
+plotCounts(ddds, gene=which.min(res$padj), intgroup="condition")
+```
+### PCA for samples
+```{R}
+plotPCA(rlog(ddds), intgroup="condition")+theme_bw()
+```
+### Distance plot for samples
+```{R}
+sampleDists <- as.matrix(dist(t(assay(rlog(ddds)))))
+cols=colorRampPalette( c("green","yellow","red"))(255)
+pheatmap(sampleDists, col=cols)
+```
+###  Expression heatmap
+```{R}
+select=row.names(res[order(-res$log2FoldChange),])[1:20]
+cols=colorRampPalette( c("green","yellow","red"))(255)
+pheatmap(assay(rlog(ddds))[select,], col=cols)
+```
+
+```{R}
+#Plot data post transformation (rlog)
+meanSdPlot(assay(rlog(ddds)))
+```
+
+```{R}
+# Maplot for res
+plotMA(res)
+```
+### Generate report in pdf
+```{R}
+# report <- DESeq2Report(ddds, project = 'Salmon-DESEQ2 workflow',
+#     intgroup = c('condition'), outdir = 'results/salmon_deseq2_results',
+#     output = 'index', theme = theme_bw(), browse = F,device = "pdf", output_format = #'pdf_document')
+```
+### Generate report in html
+```{R}
+#report <- DESeq2Report(ddds, project = 'Salmon-DESEQ2 workflow',
+#   intgroup = c('condition'), outdir = 'results/salmon_deseq2_results',
+#   output = 'index', theme = theme_bw(), browse = F)
+```
+### Save the workspace
+```{R}
+save.image("results/salmon_deseq2_results/salmon_results.Rdata")
+```
+### Load the workspace
+```{R}
+# load("results/salmon_deseq2_results/salmon_results.Rdata")
+```
