@@ -1,0 +1,49 @@
+---
+title: "Averaging triplicates in R data frame"
+output: html_notebook
+---
+    
+    Recently I came across a post where user wants to average over triplicates for each time point. I wish there were easy solutions in R. For eg. group and sum by rows or group and sum by columns without common column name. For eg triplicates will have names R1, R2 and R3. There is no way to group them esp when one has multiple triplicates. Here are three solutions for such a scenario.
+
+#### Create a data frame with two triplicates, for four genes
+```{r}
+df1 = data.frame(
+    genes = paste("gene", seq(1, 4), sep = "_"),
+    X_T0_R1 = seq(1, 4),
+    X_T0_R2 = seq(1, 4),
+    X_T0_R3 = seq(1, 4),
+    X_T1_R1 = seq(3, 6),
+    X_T1_R2 = seq(3, 6),
+    X_T1_R3 = seq(3, 6)
+)
+df1
+```
+
+####Method 1: Using tidyverse
+```{r}
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(stringr))
+gdf1 = gather(df1, "group", "Expression", -genes)
+gdf1$tgroup = apply(str_split_fixed(gdf1$group, "_", 3)[, c(1, 2)], 1, paste, collapse ="_")
+suppressPackageStartupMessages(library(dplyr))
+final_df=gdf1 %>% group_by(genes, tgroup) %>% summarize(expression_mean = mean(Expression)) %>% spread(., tgroup, expression_mean)
+final_df
+```
+
+####Method 2: Using apply and arrays: Note that headers are not store
+```{r}
+final_df=data.frame(apply(array(as.matrix(df1[,-1]), c(nrow(df1),3, ncol(df1)/3)),3, rowMeans))
+final_df=cbind(df1$genes, final_df)
+final_df
+```
+####Method 3: Using a loop, apply
+```{r}
+final_df=data.frame(matrix(nrow = nrow(df1)))
+for (i in unique(gsub("_R[1-9]","",names(df1)))[-1]){
+    final_df[,i]=apply(df1[,grepl(gsub("_R[1-9]","",i),names(df1))],1, mean)
+
+}
+final_df[,1]=df1[,1]
+names(final_df)[1]=names(df1)[1]
+final_df
+```
