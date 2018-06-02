@@ -3,7 +3,7 @@ title: "Averaging triplicates in R data frame"
 output: html_notebook
 ---
     
-    Recently I came across a post where user wants to average over triplicates for each time point. I wish there were easy solutions in R. For eg. group and sum by rows or group and sum by columns without common column name. For eg triplicates will have names R1, R2 and R3. There is no way to group them esp when one has multiple triplicates. Here are three solutions for such a scenario.
+Recently I came across a post where user wants to average over triplicates for each time point. I wish there were easy solutions in R. For eg. group and sum by rows or group and sum by columns without common column name. For eg triplicates will have names R1, R2 and R3. There is no way to group them esp when one has multiple triplicates. Here are three solutions for such a scenario.
 
 #### Create a data frame with two triplicates, for four genes
 ```{r}
