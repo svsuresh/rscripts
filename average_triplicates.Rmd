@@ -19,7 +19,7 @@ df1 = data.frame(
 df1
 ```
 
-####Method 1: Using tidyverse
+#### Method 1: Using tidyverse
 ```{r}
 suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(stringr))
@@ -30,13 +30,13 @@ final_df=gdf1 %>% group_by(genes, tgroup) %>% summarize(expression_mean = mean(E
 final_df
 ```
 
-####Method 2: Using apply and arrays: Note that headers are not store
+#### Method 2: Using apply and arrays: Note that headers are not store
 ```{r}
 final_df=data.frame(apply(array(as.matrix(df1[,-1]), c(nrow(df1),3, ncol(df1)/3)),3, rowMeans))
 final_df=cbind(df1$genes, final_df)
 final_df
 ```
-####Method 3: Using a loop, apply
+#### Method 3: Using a loop, apply
 ```{r}
 final_df=data.frame(matrix(nrow = nrow(df1)))
 for (i in unique(gsub("_R[1-9]","",names(df1)))[-1]){
