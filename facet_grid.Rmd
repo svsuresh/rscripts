@@ -2,19 +2,18 @@
 title: "Gene expression plot with faceting"
 output: html_notebook
 ---
-
 Post data analysis, a biologist is left with significant genes. These significant genes are associated with fold change, p-value. In addition, they are associated with covariates such as gender, disease state. There could be several other covariates that are associated with significant genes. 
 
 Now let us simulate expression data for 10 genes  with condition (disease state) and gender (male and female) as covariates.
 
-#### Simulate data frame for 10 genes with condition and gender as covariates
+####Simulate data frame for 10 genes with condition and gender as coordinates
 The data has expression values 10 genes and 12 samples.
 ```{R}
 df1 = data.frame(genes = paste0("gene_", seq(1, 10)), matrix(sample(round(rnorm( 120, 4, 4), 2)), 10, 12))
 colnames(df1)[-1] = paste0("sample", seq(1, 12))
 head(df1)
 ```
-#### Simulate phenotypic data
+####Simulate phenotypic data
 Phenotypic data (pheno) contains disease condition and gender status as covariates
 ```{R}
 pheno = data.frame(
@@ -30,7 +29,7 @@ library(tidyr)
 df2 = gather(df1, "sample", "expression", -genes)
 str(df2)
 ```
-#### Now let us merge the data frames.
+####Now let us merge the data frames.
 But we need to make sure that columns to be merged are of same kind and then merge it.
 ```{R}
 pheno$samples=as.character(pheno$samples)
@@ -42,7 +41,7 @@ Now let us explore the ways of display the data. First let us display the data. 
 ```{R}
 library(ggplot2)
 ```
-#### Basic box plot for all the genes, for all the conditions and for all the genders.
+####Basic box plot for all the genes, for all the conditions and for all the genders.
 Before that let us convert samples as levels.
 ```{R}
 df3$sample = as.factor(df3$sample)
@@ -53,14 +52,14 @@ Plot the data as per condition.
 ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     geom_boxplot(position = position_dodge(width = 1.1)) 
 ```
-#### Now let us draw the connecting the lines
+####Now let us draw the connecting the lines
 ```{r}
 ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     geom_boxplot(position = position_dodge(width = 1.1))+
     stat_summary(fun.y=mean, geom="line", aes(group=1))  +
     stat_summary(fun.y=mean, geom="point", size=3)
 ```
-#### Now let us add the error bars. Since R is lazy, let us draw error bars first and then other stuff.
+####Now let us add the error bars. Since R is lazy, let us draw error bars first and then other stuff.
 ```{r}
 ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     stat_boxplot(geom="errorbar", width=.5)+
@@ -68,7 +67,7 @@ ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     stat_summary(fun.y=mean, geom="line", aes(group=1))  +
     stat_summary(fun.y=mean, geom="point", size=3)
 ```
-#### Now let us draw the data over box plot
+####Now let us draw the data over box plot
 ```{r}
 ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     stat_boxplot(geom="errorbar", width=.5)+
@@ -77,7 +76,7 @@ ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     stat_summary(fun.y=mean, geom="point", size=4, alpha=0.5)+
     geom_jitter(width = 0.1, color="black", alpha=0.5)
 ```
-#### Now let us beautify the plot. Remove the background, grid lines, change the x axis and y axis labels, hide legend and increase size of tick marks and plot titles
+####Now let us beautify the plot. Remove the background, grid lines, change the x axis and y axis labels, hide legend and increase size of tick marks and plot titles
 ```{r}
 ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     stat_boxplot(geom="errorbar", width=.5)+
@@ -95,10 +94,9 @@ ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         legend.position = "none",
-        
-    )
+        )
 ```
-#### Now let us draw these per gene i.e box plot each gene.
+####Now let us draw these per gene i.e box plot each gene.
 Remember these box plot for both the genders. We can separate as per gender in next step.
 ```{r}
 ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
@@ -110,7 +108,7 @@ ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     labs(x = "Condition", y = "Expression")+
     theme_bw()+
     theme(
-        axis.text.x = element_text(size = 24),
+        axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 24),
         axis.title.x = element_text(size = 24),
         axis.title.y = element_text(size = 24),
@@ -123,7 +121,7 @@ ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
         space = "free"
     )
 ```
-#### Now let us draw box plots per gene per gender
+####Now let us draw box plots per gene per gender
 We can separate as per gender in next step.
 ```{r}
 ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
@@ -135,13 +133,15 @@ ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     labs(x = "Condition", y = "Expression")+
     theme_bw()+
     theme(
-        axis.text.x = element_text(size = 24),
+        axis.text.x = element_text(size = 9),
         axis.text.y = element_text(size = 24),
         axis.title.x = element_text(size = 24),
         axis.title.y = element_text(size = 24),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        legend.position = "none"
+        legend.position = "none",
+        strip.text.x = element_text(size = 14),
+        strip.text.y = element_text(size = 18)
     )+
     facet_grid( gender ~ genes,
         scales = 'free_y',
@@ -149,7 +149,7 @@ ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     )
 ```
 
-#### Let us the add the summary expression of all genes at the end
+####Let us the add the summary expression of all genes at the end
 
 ```{r}
 ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
@@ -161,13 +161,15 @@ ggplot(df3, aes(x = condition, y = expression, fill = condition)) +
     labs(x = "Condition", y = "Expression")+
     theme_bw()+
     theme(
-        axis.text.x = element_text(size = 24),
+        axis.text.x = element_text(size = 7),
         axis.text.y = element_text(size = 24),
         axis.title.x = element_text(size = 24),
         axis.title.y = element_text(size = 24),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        legend.position = "none"
+        legend.position = "none",
+        strip.text.x = element_text(size = 14),
+        strip.text.y = element_text(size = 18)
     )+
     facet_grid( gender ~ genes,
         scales = 'free_y',
