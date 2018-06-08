@@ -2,8 +2,6 @@
 title: "Gene expression plot with faceting"
 output: html_notebook
 ---
-here are: ![Initial box plot](https://drive.google.com/open?id=1lgfkwh0SI5YtmssJKVEnBO4veG6hfmiC), 
-![Final box plot](https://drive.google.com/file/d/1uxLLXQn_sMHts9wGFitOsA3M9w-Ory1x/view?usp=sharing)
 
 Post data analysis, a biologist is left with significant genes. These significant genes are associated with fold change, p-value. In addition, they are associated with covariates such as gender, disease state. There could be several other covariates that are associated with significant genes. 
 
