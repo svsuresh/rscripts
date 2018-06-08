@@ -1,4 +1,5 @@
 Post data analysis, a biologist is left with significant genes. These significant genes are associated with fold change, p-value. In addition, they are associated with covariates such as gender, disease state. There could be several other covariates that are associated with significant genes. 
+
 ![Initial](https://1.bp.blogspot.com/-sxck1S8fLAE/Wxp_pjyqeGI/AAAAAAAABD4/Oah80_0UMfsGVYvnm4TOyB0UzT4mHS68wCLcBGAs/s640/Rplot01.png) and 
 ![Final](https://1.bp.blogspot.com/-qSgXK2B53Pc/WxqMKs29OaI/AAAAAAAABFg/7NRP85dNp1EXDUoioWcw2Rcm7J7c00P9wCLcBGAs/s640/final.png)
 
