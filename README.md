@@ -11,3 +11,9 @@ Scripts:
 6. average_triplicates_collapse_duplicates.Rmd: This script averages (mean) triplicate columns and collapses (by mean) duplicate rows.
 7. multiple_facet_grid.Rmd - This script has gene expression data with two categories as covariates represented by ggplot. The graph has per gene, per condition, per gender faceting graphical representation.
 8. group_specific_mean_ggplot.ipynb - This script has ggplotting per group (factor/categorical variable) mean coloring cutoffline. In general, ggplot mean drawing on ggplot with multiple groups is overall mean, instead of per group mean. This script allows highlighting points per group.
+9. facet_sample_gene_R.ipynb- This script has two kinds of scripts within it: 
+--One: plotting group means and connecting them by a line per sample per time for cumulative gene expression and plotting group means and connecting them by a line per gene per time.
+--two: Plotting heatmap of expression value.
+Final figure one is bad in the code as drawing within jupyter-notebooks, i havent' mastered. Final figure second one is good. Final figure one is as ![below](https://image.ibb.co/fcXyOT/Rplot01.png)
+
+10. Replace_gene_symbols_with_entrez_ids.ipynb - This script relaces all gene symbols in data frame with NCBI entrez IDs.
