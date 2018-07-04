@@ -1,0 +1,47 @@
+---
+title: "Save multiple GGpairs plots and facet ggpairs plots"
+output: html_notebook
+---
+We have a data frame with 4 proteins and variable number of fragments per each protein. Each framents measurements are given here. We need to compare each frament against one another in each protein. Save each result and facet all the results. 
+#### Load the data
+```{r}
+df1=read.csv("ggpairs_example_data.txt", stringsAsFactors = F, strip.white = T, sep="\t")
+```
+#### Load libraries
+```{R}
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(tidyr)
+library(GGally)
+```
+#### Reformat the data frame and plot the data using ggpairs. 
+Final object is a graph list with 4 graph objects in side it
+```{R}
+p=df1 %>% 
+    gather(k,v, -protein, -fragments) %>% 
+    split(.$protein) %>% 
+    map(~spread(.,fragments, v)) %>% 
+    map(~select(.,1:ncol(.))%>%
+            ggpairs(3:ncol(.), title = paste0("fragment: ",unique(.[,1]))))
+```
+#### save each plot as individual object/png
+Now extract and save each graph object in a high resolution png with protein name on it.
+```{r}
+for(i in 1:length(p)){
+    ggsave(plot = p[[i]], file = paste0(names(p)[i],".png"), dpi = 300)
+}
+```
+#### Facet the plots using cowplot. This steps is not automated and can be automated. 4 comes from number of proteins in the data frame.
+```{R}
+library(cowplot)
+plot_grid(
+    ggmatrix_gtable(p[[1]]),
+    ggmatrix_gtable(p[[2]]),
+    ggmatrix_gtable(p[[3]]),
+    ggmatrix_gtable(p[[4]]),
+    nrow = 2,
+    ncol=2
+)
+```
+
