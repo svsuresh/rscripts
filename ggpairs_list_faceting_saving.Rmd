@@ -32,7 +32,8 @@ for(i in 1:length(p)){
     ggsave(plot = p[[i]], file = paste0(names(p)[i],".png"), dpi = 300)
 }
 ```
-#### Facet the plots using cowplot. This steps is not automated and can be automated. 4 comes from number of proteins in the data frame.
+#### Facet the plots using cowplot. 
+This step is not automated and can be automated. 4 comes from number of proteins in the data frame.
 ```{R}
 library(cowplot)
 plot_grid(
