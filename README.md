@@ -17,3 +17,4 @@ Scripts:
 Final figure one is bad in the code as drawing within jupyter-notebooks, i havent' mastered. Final figure second one is good. Final figure one is as ![below](https://image.ibb.co/fcXyOT/Rplot01.png)
 
 10. Replace_gene_symbols_with_entrez_ids.ipynb - This script relaces all gene symbols in data frame with NCBI entrez IDs.
+11. ggpairs_list_faceting_saving.Rmd - This script would create ggpairs graph list, save each one into individual file and facet them.
