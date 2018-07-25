@@ -19,4 +19,4 @@ Final figure one is bad in the code as drawing within jupyter-notebooks, i haven
 10. Replace_gene_symbols_with_entrez_ids.ipynb - This script relaces all gene symbols in data frame with NCBI entrez IDs.
 11. ggpairs_list_faceting_saving.Rmd - This script would create ggpairs graph list, save each one into individual file and facet them.
 11. look_around_R_20072018.ipynb - This script uses lookaround functions in R to separate greek letters and english words in a single string
-12. Heatmap_boxplot_clustering.Rmd - This script is about drawing a heatmap with column and row annotations with boxplot, violin and density plots as annotions and column color annotation. 
+12. Heatmap_boxplot_clustering.ipynb - This script is about drawing a heatmap with column and row annotations with boxplot, violin and density plots as annotions and column color annotation. 
