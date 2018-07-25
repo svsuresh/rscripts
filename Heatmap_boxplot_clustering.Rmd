@@ -1,0 +1,95 @@
+---
+title: "Heatmap column and row annotaions with boxplots, violin plots"
+output: html_notebook
+---
+Heatmaps for part of parcel of displaying expression trends in bioinformatics. There are several ways to represent the data. There are treemaps as well, which can plot p-values as well. But they do not show clustering and data distributions as we see in this example. Let us assume that there is there are 7 samples with expression values for two conditions let us say "Tumor" and "Normal". Let us assume that we have sex information for these samples ("male","female"). Now requirement is that we need to dispaly the expression information for both, sex ("male" and "female") and condition ("tumor" vs "normal"). Let us simulate the data.
+
+```{r}
+expn = rbind(matrix(rnorm(48, 2), 6,8), matrix(rnorm(32, -2), 4, 8))
+colnames(expn)=paste0("sample_",1:8)
+rownames(expn)=paste0("gene_",1:10)
+head(expn)
+```
+
+Now let us add meta information to the data i.e affected and sex information. There are 8 samples of which 4 are normal and 4 tumor, 4 are male and 4 are female. 
+```{R}
+meta= data.frame("sex"=rep(c("male","female"),4), "condition"= rep(c("Normal","Tumor"),each=4))
+row.names(meta)=paste0("sample_",1:8)
+meta
+```
+In this note, we will add top and bottom notations to a heatmap. Top notation will represent variables (condition and sex here) with different colors for each variable type. Bottom notation will represent data distribution as violin plots (data distribution for each sample). However, side notation will have clusters of genes and gene names. 
+
+Now we need to do some ground work before we get to the plot. We will be using gplots library for plotting the heatmap. This package supports column and row annotation. Annotation can be color bands or box plots or any thing that adheres to the requirements.
+
+Let us create colors and color keys for meta data of samples (two colors for sex and two colors for condition). These colors will be later added to column anntation. We need to create a list of two colors for each category (variable) here. In heatmap, samples will be in columns and genes will be in rows.
+
+```{r}
+cols= list(
+        "sex" = c("male" = "red2", "female" = "steelblue"),
+        "condition" = c("Tumor" = "limegreen", "Normal" = "gold")
+    )
+cols
+```
+Now we have created colors  and meta information for the samples. Let us create column annotation using both the information. For this we need a function (HeatmapAnnotation) from main libary. Let us load the library.
+```{r}
+suppressPackageStartupMessages(library(ComplexHeatmap))
+```
+
+```{r}
+colAnn <-
+    HeatmapAnnotation(
+        df = meta,
+        which = "column",
+        col = cols,
+        annotation_width = unit(c(1, 4), "cm"),
+        gap = unit(1, "mm"),
+        histogram = anno_histogram(expn,gp=gpar(fill=rainbow(length(colnames(expn))))),
+        density_line = anno_density(expn, type = "line",gp=gpar(fill=rainbow(length(colnames(expn)))))
+    )
+```
+Now let us create second (bottom) annotation, which is violin plot representation of data.
+```{r}
+violin_Col <-
+    HeatmapAnnotation(
+        violin = anno_density(expn, type = "violin", gp = gpar(fill = rainbow(length(row.names(meta))))), which = "col"
+    )
+```
+we can row annotation functions. For the sake of uniform code, I am using which=row/column. 
+
+```{R}
+ha_mix_right = HeatmapAnnotation(
+    histogram = anno_histogram(expn, which = "row", gp=gpar(fill=rainbow(length(row.names(expn))))), 
+    density_line = anno_density(expn, which ="row", gp=gpar(fill=rainbow(length(row.names(expn))))),
+    violin = anno_density(expn, type = "violin", which = "row", gp=gpar(fill=rainbow(length(row.names(expn))))),
+    which = "row", width = unit(8, "cm"))
+```
+
+Now let us create main plot,
+```{R}
+hmap <- Heatmap(expn,
+    col = colorRampPalette(c("green","red"))(75),
+    show_row_names = T,
+    show_column_names = T,
+    cluster_rows = TRUE,
+    cluster_columns = TRUE,
+    show_column_dend = TRUE,
+    show_row_dend = TRUE,
+    row_dend_reorder = TRUE,
+    column_dend_reorder = TRUE,
+    clustering_method_rows = "ward.D2",
+    clustering_method_columns = "ward.D2",
+    width = unit(100, "mm"),
+    top_annotation_height = unit(4.0, "cm"),
+    top_annotation = colAnn,
+    bottom_annotation_height = unit(3, "cm"),
+    bottom_annotation = violin_Col,
+    column_title = "Expression data with column annotations"
+)
+```
+
+Draw the plot
+```{R fig.height=10}
+draw(ha_mix_right+hmap,
+     heatmap_legend_side = "right",
+     annotation_legend_side = "right")
+```
