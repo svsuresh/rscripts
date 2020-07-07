@@ -20,3 +20,4 @@ Final figure one is bad in the code as drawing within jupyter-notebooks, i haven
 11. ggpairs_list_faceting_saving.Rmd - This script would create ggpairs graph list, save each one into individual file and facet them.
 11. look_around_R_20072018.ipynb - This script uses lookaround functions in R to separate greek letters and english words in a single string
 12. Heatmap_boxplot_clustering.ipynb - This script is about drawing a heatmap with column and row annotations with boxplot, violin and density plots as annotions and column color annotation. 
+13. Rowwise t test folder contains an example file and a function to run simple row wise t tests. Function takes one matrix, start and end columns of first group. Rest columns are automatically assigned to be second group. 
