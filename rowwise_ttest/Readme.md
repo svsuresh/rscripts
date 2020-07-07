@@ -1,0 +1,1 @@
+This script takes a matrix, with two groups. Runs row wise t-tests with default params. Script takes 3 arguments: a matrix, start and end columns of one group. Rest columns are automatically assigned to be second group in the script.
